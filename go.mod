@@ -3,6 +3,7 @@ module github.com/Payphone-Digital/Helpers
 go 1.20
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/go-zoox/core-utils v1.2.11 // indirect
 	github.com/go-zoox/fetch v1.7.12 // indirect
 	github.com/go-zoox/headers v1.0.6 // indirect

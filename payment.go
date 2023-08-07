@@ -12,9 +12,9 @@ import (
 )
 
 var (
-	marchant string = os.Getenv("PAYMENT_ID")
-	apikey   string = os.Getenv("PAYMENT_APIKEY")
-	dateTime string = time.Now().Format("2006-01-02 15:04:05")
+	marchant = os.Getenv("PAYMENT_ID")
+	apikey   = os.Getenv("PAYMENT_APIKEY")
+	dateTime = time.Now().Format("2006-01-02 15:04:05")
 )
 
 // type Payment struct {

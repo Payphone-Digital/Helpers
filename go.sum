@@ -1,3 +1,5 @@
+github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
+github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/go-zoox/core-utils v1.2.11 h1:3h8P4d+P1XTEzi6M68CywUfy4p8WEZOFuWME8uIYJJ4=
 github.com/go-zoox/core-utils v1.2.11/go.mod h1:Y6izFcxuELrkOen5mTQccCJxJqqPJaZV5dQtUMBdkBM=
 github.com/go-zoox/fetch v1.7.12 h1:q3x9ol6ylas4HL0YLMDkUZeCFHT+AbB9LT6SxciD/h0=
