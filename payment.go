@@ -17,13 +17,6 @@ var (
 	dateTime = time.Now().Format("2006-01-02 15:04:05")
 )
 
-// type Payment struct {
-// 	MARCHANT string "json:merchantcode"
-// 	AMOUNT   string "json:amount"
-// 	DATETIME string "json:datetime"
-// 	SIGNATUR string "json:signature"
-// }
-
 func GetPayment(amount string) *bytes.Buffer {
 	hash := sha256.Sum256([]byte(marchant + amount + dateTime + apikey))
 	res, err := fetch.Post(os.Getenv("PAYMENT_URL")+"/webapi/api/merchant/paymentmethod/getpaymentmethod",
@@ -41,7 +34,7 @@ func GetPayment(amount string) *bytes.Buffer {
 	return bytes.NewBuffer(res.Body)
 }
 
-func TransaksiPayment(orderId string, amount string, paymentCode string, customerNumber string) *bytes.Buffer {
+func TransaksiPayment(orderId, amount, paymentCode, customerNumber string) *bytes.Buffer {
 	hash := sha256.Sum256([]byte(marchant + orderId + apikey))
 	res, err := fetch.Post(os.Getenv("PAYMENT_URL")+"/webapi/api/merchant/v2/inquiry",
 		&fetch.Config{Body: map[string]string{

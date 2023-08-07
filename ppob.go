@@ -26,7 +26,7 @@ func CheckSaldoPpob() *bytes.Buffer {
 	return bytes.NewBuffer(jsonValue)
 }
 
-func DepositSaldoPpob(at int64, bk string, or string) *bytes.Buffer {
+func DepositSaldoPpob(at int64, bk, or string) *bytes.Buffer {
 	hash := md5.Sum([]byte(os.Getenv("PPOB_USERNAME") + os.Getenv("PPOB_APIKEY") + "deposit"))
 	res, err := fetch.Post(os.Getenv("PPOB_URL")+"/v1/deposit", &fetch.Config{
 		Body: SaldoDepositAuth{
@@ -66,7 +66,7 @@ func PraBayarPpob() *bytes.Buffer {
 	return bytes.NewBuffer(jsonValue)
 }
 
-func TransaksiPraBayarPpob(ref string, sku string, cusno string) *bytes.Buffer {
+func TransaksiPraBayarPpob(ref, sku, cusno string) *bytes.Buffer {
 	hash := md5.Sum([]byte(os.Getenv("PPOB_USERNAME") + os.Getenv("PPOB_APIKEY") + ref))
 	res, err := fetch.Post(os.Getenv("PPOB_URL")+"/v1/transaction", &fetch.Config{
 		Body: TransaksiPraBayar{
@@ -96,7 +96,7 @@ func TransaksiPraBayarPpob(ref string, sku string, cusno string) *bytes.Buffer {
 	return bytes.NewBuffer(jsonValue)
 }
 
-func PascabayarPpob(ref string, sku string, cusno string) *bytes.Buffer {
+func PascabayarPpob(ref, sku, cusno string) *bytes.Buffer {
 	var harga ResponsePasca
 	hash := md5.Sum([]byte(os.Getenv("PPOB_USERNAME") + os.Getenv("PPOB_APIKEY") + ref))
 	res, err := fetch.Post(os.Getenv("PPOB_URL")+"/v1/transaction", &fetch.Config{
@@ -117,7 +117,7 @@ func PascabayarPpob(ref string, sku string, cusno string) *bytes.Buffer {
 	return bytes.NewBuffer(jsonValue)
 }
 
-func TransaksiPascabayarPpob(ref string, sku string, cusno string) *bytes.Buffer {
+func TransaksiPascabayarPpob(ref, sku, cusno string) *bytes.Buffer {
 	var harga ResponsePasca
 	hash := md5.Sum([]byte(os.Getenv("PPOB_USERNAME") + os.Getenv("PPOB_APIKEY") + ref))
 	res, err := fetch.Post(os.Getenv("PPOB_URL")+"/v1/transaction", &fetch.Config{
@@ -159,7 +159,7 @@ func InquirePlnPpob(cusno string) *bytes.Buffer {
 	return bytes.NewBuffer(jsonValue)
 }
 
-func CheckTagihanPpob(ref string, sku string, cusno string) *bytes.Buffer {
+func CheckTagihanPpob(ref, sku, cusno string) *bytes.Buffer {
 	hash := md5.Sum([]byte(os.Getenv("PPOB_USERNAME") + os.Getenv("PPOB_APIKEY") + ref))
 	res, err := fetch.Post(os.Getenv("PPOB_URL")+"/v1/transaction", &fetch.Config{
 		Body: CheckStatus{
