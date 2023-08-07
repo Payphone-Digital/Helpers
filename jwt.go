@@ -13,8 +13,5 @@ func CreateJWT(ex time.Duration, secret string) (string, error) {
 		claims["exp"] = time.Now().Add(time.Hour * ex).Unix()
 	}
 	tokenStr, err := token.SignedString(secret)
-	if err != nil {
-		return "", err
-	}
-	return tokenStr, nil
+	return tokenStr, err
 }
