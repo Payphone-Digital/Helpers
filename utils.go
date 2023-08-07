@@ -25,10 +25,15 @@ func GenerateStateOauthCookie(name string, w http.ResponseWriter) string {
 	return state
 }
 
-func CreateJWT(ex time.Duration, secret string) (string, error) {
+func CreateJWT(secret, id, name, email, telp string, verify bool, ex time.Duration) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	if ex == 0 {
+	claims["id"] = id
+	claims["name"] = name
+	claims["email"] = email
+	claims["telp"] = email
+	claims["verify"] = verify
+	if ex > 0 {
 		claims["exp"] = time.Now().Add(time.Hour * ex).Unix()
 	}
 	tokenStr, err := token.SignedString(secret)
