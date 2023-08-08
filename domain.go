@@ -2,46 +2,49 @@ package helpers
 
 import (
 	"bytes"
-	"encoding/base64"
-	"os"
 
 	"github.com/go-zoox/fetch"
 )
 
-var basic = map[string]string{"Authorization": "Basic " + base64.StdEncoding.EncodeToString([]byte(os.Getenv("DOMAIN_RESID")+":"+os.Getenv("DOMAIN_APIKEY")))}
+func (d *DomainNeed) Domain(url string, header map[string]string) *DomainNeed {
+	return &DomainNeed{
+		Url:    url,
+		Header: header,
+	}
+}
 
 //Start Account Domain
 
-func BalanceAccount() (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/account/balance",
-		&fetch.Config{Headers: basic})
+func (d *DomainNeed) BalanceAccount() (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/account/balance",
+		&fetch.Config{Headers: d.Header})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PriceAccount() (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/account/prices",
-		&fetch.Config{Headers: basic})
+func (d *DomainNeed) PriceAccount() (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/account/prices",
+		&fetch.Config{Headers: d.Header})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func TransactionAccount(data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/account/transactions",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) TransactionAccount(data map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/account/transactions",
+		&fetch.Config{Headers: d.Header, Params: data})
 	return bytes.NewBuffer(res.Body), err
 }
 
 //End Account Domain
 
 // Start Costumer
-func GetCostumer(data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/customers",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetCostumer(param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/customers",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PostCostumer(data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/customers",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PostCostumer(param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/customers",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
@@ -49,15 +52,15 @@ func PostCostumer(data map[string]string) (*bytes.Buffer, error) {
 
 //Start Domain Forwarding
 
-func GetForwardingDomain(id string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/domain_forwarding",
-		&fetch.Config{Headers: basic})
+func (d *DomainNeed) GetForwardingDomain(id string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/"+id+"/domain_forwarding",
+		&fetch.Config{Headers: d.Header})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func UpdateForwardingDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/domain_forwarding",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) UpdateForwardingDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/domain_forwarding",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
@@ -65,27 +68,27 @@ func UpdateForwardingDomain(id string, data map[string]string) (*bytes.Buffer, e
 
 //Start Privacy Protection
 
-func GetPrivacyProtection(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/privacy_protection",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetPrivacyProtection(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/"+id+"/privacy_protection",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PostPrivacyProtection(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/privacy_protection/buy",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PostPrivacyProtection(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/privacy_protection/buy",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PutPrivacyProtection(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/privacy_protection",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PutPrivacyProtection(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/privacy_protection",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DeletePrivacyProtection(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Delete(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/privacy_protection",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DeletePrivacyProtection(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Delete(d.Url+"/v1/domains/"+id+"/privacy_protection",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
@@ -93,29 +96,29 @@ func DeletePrivacyProtection(id string, data map[string]string) (*bytes.Buffer, 
 
 // Start Domain
 // Start Search Domain
-func GetSearchBuyDomain(data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/suggestion",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetSearchBuyDomain(param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/suggestion",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func GetAllDomain(data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetAllDomain(param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func GetByNameDomain(data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/details-by-name",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetByNameDomain(param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/details-by-name",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 // End Search Domain
 // Start Register Domain
-func RegisterDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) RegisterDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
@@ -123,27 +126,27 @@ func RegisterDomain(id string, data map[string]string) (*bytes.Buffer, error) {
 
 // Start Transfer Domain
 
-func TransferDomain(data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/transfer",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) TransferDomain(param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/transfer",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func ValidityTransferDomain(data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/transfer/validity",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) ValidityTransferDomain(param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/transfer/validity",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func CencelTransferDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/transfer/cancel",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) CencelTransferDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/transfer/cancel",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func ResendTransferDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/transfer/resend_approval_email",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) ResendTransferDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/transfer/resend_approval_email",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
@@ -151,15 +154,15 @@ func ResendTransferDomain(id string, data map[string]string) (*bytes.Buffer, err
 
 //Start Code Epp
 
-func GetEppDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/auth_code",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetEppDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/auth_code",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func UpdateEppDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/auth_code",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) UpdateEppDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/auth_code",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
@@ -167,21 +170,21 @@ func UpdateEppDomain(id string, data map[string]string) (*bytes.Buffer, error) {
 
 //Start Theft Protect
 
-func GetTheftProtectDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/theft_protection",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetTheftProtectDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/theft_protection",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func EnableTheftProtectDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/theft_protection",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) EnableTheftProtectDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/theft_protection",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DisableTheftProtectDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Delete(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/theft_protection",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DisableTheftProtectDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Delete(d.Url+"/v1/domains/"+id+"/theft_protection",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
@@ -189,21 +192,21 @@ func DisableTheftProtectDomain(id string, data map[string]string) (*bytes.Buffer
 
 //Start Suspend
 
-func GetSuspendDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/suspended",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetSuspendDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/suspended",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func EnableSuspendDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/suspended",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) EnableSuspendDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/suspended",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DisableSuspendDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Delete(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/suspended",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DisableSuspendDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Delete(d.Url+"/v1/domains/"+id+"/suspended",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
@@ -211,135 +214,135 @@ func DisableSuspendDomain(id string, data map[string]string) (*bytes.Buffer, err
 
 //Start Locked
 
-func GetLockedDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/locked",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetLockedDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/locked",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func EnableLockedDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/locked",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) EnableLockedDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/locked",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DisableLockedDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Delete(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/locked",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DisableLockedDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Delete(d.Url+"/v1/domains/"+id+"/locked",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 //End Locked
 
 // Start Ns
-func GetNsDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/ns",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetNsDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/ns",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func UpdateNsDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/ns",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) UpdateNsDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/ns",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 //End Ns
 
 // Start Raa Verification
-func GetRaaVerifyDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/raa_verification",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetRaaVerifyDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/"+id+"/raa_verification",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PostRaaVerifyDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/raa_verification/resend",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PostRaaVerifyDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/raa_verification/resend",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 //End Raa Verification
 
 // Start Renew Domain
-func RenewDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/renew",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) RenewDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/renew",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 // End Renew Domain
 
 // Start Restore Domain
-func RestoreDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/restore",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) RestoreDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/restore",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 // End Restore Domain
 
 // Start Move Domain
-func MoveDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/move",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) MoveDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/move",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 // End Move Domain
 
 // Start Irtp Verification Domain
-func IrtpVerifyDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/irtp_verification/resend",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) IrtpVerifyDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/irtp_verification/resend",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 // End Irtp Verification Domain
 
 // Start DNSSEC
-func GetDnssecDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dnssec",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetDnssecDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/"+id+"/dnssec",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PostDnssecDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dnssec",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PostDnssecDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/dnssec",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DeleteDnssecDomain(id, keytag, algorithm, digesttype, digest string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dnssec/"+keytag+"/"+algorithm+"/"+digesttype+"/"+digest,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DeleteDnssecDomain(id, keytag, algorithm, digesttype, digest string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/dnssec/"+keytag+"/"+algorithm+"/"+digesttype+"/"+digest,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 //End DNSSEC
 
 // Start Child DNS
-func GetChilddnsDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/childns",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetChilddnsDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/"+id+"/childns",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PostChilddnsDomain(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/childns",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PostChilddnsDomain(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/childns",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func UpdateChilddnsDomain(id, old_hosname, old_ip_address string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/childns/"+old_hosname+"/"+old_ip_address,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) UpdateChilddnsDomain(id, old_hosname, old_ip_address string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/childns/"+old_hosname+"/"+old_ip_address,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DeleteChilddnsDomain(id string, hosname string, ip_address string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/childns/"+hosname+"/"+ip_address,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DeleteChilddnsDomain(id string, hosname string, ip_address string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/childns/"+hosname+"/"+ip_address,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
@@ -348,157 +351,157 @@ func DeleteChilddnsDomain(id string, hosname string, ip_address string, data map
 
 // Start Domain DNS
 // Start CNAME
-func GetDnsCname(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/cname",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetDnsCname(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/"+id+"/dns/cname",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PostDnsCname(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/cname",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PostDnsCname(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/dns/cname",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PutDnsCname(id, old_hostname, old_value string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/cname/"+old_hostname+"/"+old_value,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PutDnsCname(id, old_hostname, old_value string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/dns/cname/"+old_hostname+"/"+old_value,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DeleteDnsCname(id, hostname, value string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Delete(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/cname/"+hostname+"/"+value,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DeleteDnsCname(id, hostname, value string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Delete(d.Url+"/v1/domains/"+id+"/dns/cname/"+hostname+"/"+value,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 // End CNAME
 // Start IPv4
-func GetDnsIpv4(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/ip",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetDnsIpv4(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/"+id+"/dns/ip",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PostDnsIpv4(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/ip",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PostDnsIpv4(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/dns/ip",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PutDnsIpv4(id, old_hostname, old_value string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/ip/"+old_hostname+"/"+old_value,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PutDnsIpv4(id, old_hostname, old_value string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/dns/ip/"+old_hostname+"/"+old_value,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DeleteDnsIpv4(id, hostname, value string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Delete(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/ip/"+hostname+"/"+value,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DeleteDnsIpv4(id, hostname, value string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Delete(d.Url+"/v1/domains/"+id+"/dns/ip/"+hostname+"/"+value,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 // End IPv4
 // Start IPv6
-func GetDnsIpv6(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/ipv6",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetDnsIpv6(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/"+id+"/dns/ipv6",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PostDnsIpv6(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/ipv6",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PostDnsIpv6(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/dns/ipv6",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PutDnsIpv6(id, old_hostname, old_value string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/ipv6/"+old_hostname+"/"+old_value,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PutDnsIpv6(id, old_hostname, old_value string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/dns/ipv6/"+old_hostname+"/"+old_value,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DeleteDnsIpv6(id, hostname, value string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Delete(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/ipv6/"+hostname+"/"+value,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DeleteDnsIpv6(id, hostname, value string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Delete(d.Url+"/v1/domains/"+id+"/dns/ipv6/"+hostname+"/"+value,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 // End IPv6
 // Start MX
-func GetDnsMx(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/mx",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetDnsMx(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/"+id+"/dns/mx",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PostDnsMx(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/mx",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PostDnsMx(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/dns/mx",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PutDnsMx(id, old_hostname, old_value string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/mx/"+old_hostname+"/"+old_value,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PutDnsMx(id, old_hostname, old_value string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/dns/mx/"+old_hostname+"/"+old_value,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DeleteDnsMx(id, hostname, value string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Delete(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/mx/"+hostname+"/"+value,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DeleteDnsMx(id, hostname, value string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Delete(d.Url+"/v1/domains/"+id+"/dns/mx/"+hostname+"/"+value,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 // End MX
 // Start SRV
-func GetDnsSrv(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/srv",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetDnsSrv(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/"+id+"/dns/srv",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PostDnsSrv(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/srv",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PostDnsSrv(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/dns/srv",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PutDnsSrv(id, old_hostname, old_value, old_port, old_weight, old_priority string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/srv/"+old_hostname+"/"+old_value+"/"+old_port+"/"+old_weight+"/"+old_priority,
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PutDnsSrv(id, old_hostname, old_value, old_port, old_weight, old_priority string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/dns/srv/"+old_hostname+"/"+old_value+"/"+old_port+"/"+old_weight+"/"+old_priority,
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DeleteDnsSrv(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Delete(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/srv",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DeleteDnsSrv(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Delete(d.Url+"/v1/domains/"+id+"/dns/srv",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
 // End SRV
 // Start TXT
-func GetDnsTxt(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Get(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/txt",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) GetDnsTxt(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Get(d.Url+"/v1/domains/"+id+"/dns/txt",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PostDnsTxt(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Post(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/txt",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PostDnsTxt(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Post(d.Url+"/v1/domains/"+id+"/dns/txt",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func PutDnsTxt(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Put(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/txt",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) PutDnsTxt(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Put(d.Url+"/v1/domains/"+id+"/dns/txt",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 
-func DeleteDnsTxt(id string, data map[string]string) (*bytes.Buffer, error) {
-	res, err := fetch.Delete(os.Getenv("DOMAIN_URL")+"/v1/domains/"+id+"/dns/txt",
-		&fetch.Config{Headers: basic, Params: data})
+func (d *DomainNeed) DeleteDnsTxt(id string, param map[string]string) (*bytes.Buffer, error) {
+	res, err := fetch.Delete(d.Url+"/v1/domains/"+id+"/dns/txt",
+		&fetch.Config{Headers: d.Header, Params: param})
 	return bytes.NewBuffer(res.Body), err
 }
 

@@ -4,64 +4,50 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
-	"os"
 	"time"
 
 	"github.com/go-zoox/fetch"
 )
 
-var (
-	marchant = os.Getenv("PAYMENT_ID")
-	apikey   = os.Getenv("PAYMENT_APIKEY")
-	dateTime = time.Now().Format("2006-01-02 15:04:05")
-)
+func Payment(url, merchant, apikey string) *PaymentNeed {
+	return &PaymentNeed{
+		Url:      url,
+		Merchant: merchant,
+		Apikey:   apikey,
+		Times:    time.Now().Format("2006-01-02 15:04:05"),
+	}
+}
 
-func GetPayment(amount string) *bytes.Buffer {
-	hash := sha256.Sum256([]byte(marchant + amount + dateTime + apikey))
-	res, err := fetch.Post(os.Getenv("PAYMENT_URL")+"/webapi/api/merchant/paymentmethod/getpaymentmethod",
+func (p *PaymentNeed) Method(amount string) (*bytes.Buffer, error) {
+	hash := sha256.Sum256([]byte(p.Merchant + amount + p.Times + p.Apikey))
+	res, err := fetch.Post(p.Url+"/webapi/api/merchant/paymentmethod/getpaymentmethod",
 		&fetch.Config{Body: map[string]string{
-			"merchantcode": marchant,
+			"merchantcode": p.Merchant,
 			"amount":       amount,
-			"datetime":     dateTime,
+			"datetime":     p.Times,
 			"signature":    hex.EncodeToString(hash[:]),
 		}})
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return bytes.NewBuffer(res.Body)
+	return bytes.NewBuffer(res.Body), err
 }
 
-func TransaksiPayment(orderId, amount, paymentCode, customerNumber string) *bytes.Buffer {
-	hash := sha256.Sum256([]byte(marchant + orderId + apikey))
-	res, err := fetch.Post(os.Getenv("PAYMENT_URL")+"/webapi/api/merchant/v2/inquiry",
+func (p *PaymentNeed) Transaksi(orderId, amount, paymentCode, customerNumber string) (*bytes.Buffer, error) {
+	hash := sha256.Sum256([]byte(p.Merchant + orderId + p.Apikey))
+	res, err := fetch.Post(p.Url+"/webapi/api/merchant/v2/inquiry",
 		&fetch.Config{Body: map[string]string{
-			"merchantcode":    marchant,
-			"merchantOrderId": dateTime,
+			"merchantcode":    p.Merchant,
+			"merchantOrderId": p.Times,
 			"signature":       hex.EncodeToString(hash[:]),
 		}})
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return bytes.NewBuffer(res.Body)
+	return bytes.NewBuffer(res.Body), err
 }
 
-func TransaksiCheck(orderId string) *bytes.Buffer {
-	hash := sha256.Sum256([]byte(marchant + orderId + apikey))
-	res, err := fetch.Post(os.Getenv("PAYMENT_URL")+"/webapi/api/merchant/transactionStatus",
+func (p *PaymentNeed) TransaksiCheck(orderId string) (*bytes.Buffer, error) {
+	hash := sha256.Sum256([]byte(p.Merchant + orderId + p.Apikey))
+	res, err := fetch.Post(p.Url+"/webapi/api/merchant/transactionStatus",
 		&fetch.Config{Body: map[string]string{
-			"merchantcode":    marchant,
-			"merchantOrderId": dateTime,
+			"merchantcode":    p.Merchant,
+			"merchantOrderId": p.Times,
 			"signature":       hex.EncodeToString(hash[:]),
 		}})
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return bytes.NewBuffer(res.Body)
+	return bytes.NewBuffer(res.Body), err
 }
