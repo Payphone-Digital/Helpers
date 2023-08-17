@@ -27,19 +27,33 @@ func GenerateStateOauthCookie(name string, w http.ResponseWriter) string {
 	return state
 }
 
-func CreateJWT(secret, id, name, email, telp string, verify bool, ex time.Duration) (string, error) {
+func CreateJWT(data map[string]interface{}, secret string, ex time.Duration) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["id"] = id
-	claims["name"] = name
-	claims["email"] = email
-	claims["telp"] = email
-	claims["verify"] = verify
+	for key, value := range data {
+		claims[key] = value
+	}
 	if ex > 0 {
 		claims["exp"] = time.Now().Add(time.Hour * ex).Unix()
 	}
-	tokenStr, err := token.SignedString(secret)
+	tokenStr, err := token.SignedString([]byte(secret))
 	return tokenStr, err
+}
+
+func RandomString(length int) (string, error) {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	randomBytes := make([]byte, length)
+
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return "", err
+	}
+
+	for i := 0; i < length; i++ {
+		randomBytes[i] = charset[randomBytes[i]%byte(len(charset))]
+	}
+
+	return string(randomBytes), nil
 }
 
 func IntOnly(str string) (int, error) {
