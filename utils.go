@@ -3,6 +3,7 @@ package helpers
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -103,11 +104,21 @@ func IntOnly(str string) (int, error) {
 	return result, nil
 }
 
+func IsOperator(char rune) bool {
+	operators := "+-*/!@#$%^&()-=" // Anda dapat menambahkan operator lain yang mungkin digunakan
+	return strings.ContainsRune(operators, char)
+}
+
 func Uws(input string) string {
 	return strings.ReplaceAll(input, "_", " ")
 }
 
-func IsOperator(char rune) bool {
-	operators := "+-*/!@#$%^&()-=" // Anda dapat menambahkan operator lain yang mungkin digunakan
-	return strings.ContainsRune(operators, char)
+func IsObject(jsonData string) bool {
+	var data interface{}
+	if err := json.Unmarshal([]byte(jsonData), &data); err != nil {
+		return false
+	}
+
+	_, ok := data.(map[string]interface{})
+	return ok
 }
