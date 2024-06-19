@@ -9,7 +9,6 @@ import (
 
 type DataError struct {
 	DATA    string `json:"data"`
-	FIELD   string `json:"field"`
 	ERROR   string `json:"error"`
 	MESSAGE string `json:"message"`
 }
@@ -38,9 +37,8 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 		if !ok {
 			arr = append(arr, DataError{
 				DATA:    "Data Array " + num,
-				FIELD:   field,
-				ERROR:   "Field not found",
 				MESSAGE: "Not found " + field,
+				ERROR:   field + " Field not found",
 			})
 		}
 
@@ -68,9 +66,8 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 			for _, fieldError := range validationError {
 				arr = append(arr, DataError{
 					DATA:    "Data Array " + num,
-					FIELD:   field,
-					ERROR:   "Error " + fieldError.Tag(),
 					MESSAGE: getMessage(rules, field, fieldError.Tag()),
+					ERROR:   field + " Error " + fieldError.Tag(),
 				})
 			}
 		}
@@ -82,9 +79,8 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 		if !contains(intData, item) {
 			arr = append(arr, DataError{
 				DATA:    "Data Array " + num,
-				FIELD:   item,
-				ERROR:   "Forbiden Field " + item,
 				MESSAGE: "This data is prohibited from being input",
+				ERROR:   item + " Forbiden Field " + item,
 			})
 		}
 	}
