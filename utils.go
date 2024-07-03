@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"net/http"
 	"strconv"
@@ -245,11 +246,54 @@ func Divide(a, b interface{}) (interface{}, error) {
 }
 
 // Fungsi untuk memeriksa apakah suatu nilai ada dalam slice
-func contains(slice []string, key string) bool {
-	for _, item := range slice {
-		if item == key {
+func contains(slice []string, item string) bool {
+	for _, a := range slice {
+		if a == item {
 			return true
 		}
 	}
 	return false
+}
+
+// Node represents a generic XML node with nested children.
+type Node struct {
+	XMLName xml.Name
+	Attrs   []xml.Attr `xml:",any,attr"`
+	Content string     `xml:",chardata"`
+	Nodes   []Node     `xml:",any"`
+}
+
+// Convert a Node to a map
+func (n Node) ToMap() map[string]interface{} {
+	m := make(map[string]interface{})
+
+	// Process attributes
+	for _, attr := range n.Attrs {
+		m[attr.Name.Local] = attr.Value
+	}
+
+	// Process children nodes
+	for _, child := range n.Nodes {
+		childMap := child.ToMap()
+		if existing, found := m[child.XMLName.Local]; found {
+			switch existing := existing.(type) {
+			case []interface{}:
+				m[child.XMLName.Local] = append(existing, childMap[child.XMLName.Local])
+			default:
+				m[child.XMLName.Local] = []interface{}{existing, childMap[child.XMLName.Local]}
+			}
+		} else {
+			m[child.XMLName.Local] = childMap[child.XMLName.Local]
+		}
+	}
+
+	// If the map is empty, return the content
+	if len(m) == 0 {
+		if strings.TrimSpace(n.Content) != "" {
+			return map[string]interface{}{n.XMLName.Local: n.Content}
+		}
+		return map[string]interface{}{n.XMLName.Local: nil}
+	}
+
+	return map[string]interface{}{n.XMLName.Local: m}
 }

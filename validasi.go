@@ -35,27 +35,28 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 		//Mengecek Column Apakah Sudah Ada
 		value, ok := data[field]
 		if !ok {
+			// Jika kolom tidak ditemukan, tambahkan error
 			arr = append(arr, DataError{
 				DATA:    "Data Array " + num,
 				MESSAGE: "Not found " + field,
 				ERROR:   field + " Field not found",
 			})
+			continue
 		}
 
 		//Menyusun Validasi Apa Yang Harus Digunakan Pada Data Json
 		for _, v := range rules[idx]["validasi"].([]interface{}) {
 			vMap, _ := v.(map[string]interface{})
-			// if !ok {
-			// 	// Menangani kasus di mana nilai setiap elemen tidak sesuai dengan tipe yang diharapkan
-			// 	fmt.Println("Error: Failed to convert validasi item to map[string]interface{}")
-			// 	continue
-			// }
 			if banding != idx {
 				banding = idx
 				tags = ""
 			}
 			if rules[idx]["column"].(string) == field {
-				tags = tags + "," + vMap["valid"].(string)
+				if val, hasVal := vMap["value"]; hasVal {
+					tags = tags + "," + vMap["valid"].(string) + "=" + val.(string)
+				} else {
+					tags = tags + "," + vMap["valid"].(string)
+				}
 			}
 		}
 		tags = strings.TrimLeft(tags, ",")
@@ -64,6 +65,15 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 		if err := validate.Var(value, tags); err != nil {
 			validationError := err.(validator.ValidationErrors)
 			for _, fieldError := range validationError {
+				// Jika ada default value dan value saat ini kosong, gunakan default
+				if defaultValue, hasDefault := tag["default"]; hasDefault && value == "" {
+					value = defaultValue
+					// Validasi ulang dengan nilai default
+					if err := validate.Var(value, tags); err == nil {
+						continue
+					}
+				}
+
 				arr = append(arr, DataError{
 					DATA:    "Data Array " + num,
 					MESSAGE: getMessage(rules, field, fieldError.Tag()),
