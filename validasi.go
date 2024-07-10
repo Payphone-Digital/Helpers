@@ -12,10 +12,11 @@ type DataError struct {
 	ERROR   string `json:"error"`
 	MESSAGE string `json:"message"`
 }
+
 type Validator struct{}
 
 func (v *Validator) Validate(data map[string]interface{}, rules []map[string]interface{}, num string) (string, error) {
-	//Variabel Data Awal
+	// Variabel Data Awal
 	validate := validator.New()
 	var arr []DataError
 	var intData []string
@@ -23,7 +24,7 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 	var tags string
 	var banding int
 
-	//Mengecek data yang tidak diizinkan Masuk
+	// Mengecek data yang tidak diizinkan Masuk
 	for al := range data {
 		extData = append(extData, al)
 	}
@@ -32,19 +33,23 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 		field := tag["column"].(string)
 		intData = append(intData, field)
 
-		//Mengecek Column Apakah Sudah Ada
+		// Mengecek Column Apakah Sudah Ada
 		value, ok := data[field]
-		if !ok {
-			// Jika kolom tidak ditemukan, tambahkan error
-			arr = append(arr, DataError{
-				DATA:    "Data Array " + num,
-				MESSAGE: "Not found " + field,
-				ERROR:   field + " Field not found",
-			})
-			continue
+		if !ok || value == "" {
+			// Cek apakah ada default value dan apakah default tidak kosong
+			if defaultValue, hasDefault := tag["default"]; hasDefault && defaultValue != "" {
+				value = defaultValue
+			} else {
+				arr = append(arr, DataError{
+					DATA:    "Data Array " + num,
+					MESSAGE: "Not found " + field,
+					ERROR:   field + " Field not found",
+				})
+				continue
+			}
 		}
 
-		//Menyusun Validasi Apa Yang Harus Digunakan Pada Data Json
+		// Menyusun Validasi Apa Yang Harus Digunakan Pada Data Json
 		for _, v := range rules[idx]["validasi"].([]interface{}) {
 			vMap, _ := v.(map[string]interface{})
 			if banding != idx {
@@ -53,7 +58,16 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 			}
 			if rules[idx]["column"].(string) == field {
 				if val, hasVal := vMap["value"]; hasVal {
-					tags = tags + "," + vMap["valid"].(string) + "=" + val.(string)
+					if valStr, ok := val.(string); ok && valStr != "" {
+						tags = tags + "," + vMap["valid"].(string) + "=" + valStr
+					} else {
+						// Handle missing or empty value for validation
+						arr = append(arr, DataError{
+							DATA:    "Data Array " + num,
+							MESSAGE: "Missing or invalid value for validation " + vMap["valid"].(string),
+							ERROR:   field + " Error " + vMap["valid"].(string),
+						})
+					}
 				} else {
 					tags = tags + "," + vMap["valid"].(string)
 				}
@@ -61,19 +75,10 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 		}
 		tags = strings.TrimLeft(tags, ",")
 
-		//Core Validasi Untuk Mengecek Validasi
+		// Core Validasi Untuk Mengecek Validasi
 		if err := validate.Var(value, tags); err != nil {
 			validationError := err.(validator.ValidationErrors)
 			for _, fieldError := range validationError {
-				// Jika ada default value dan value saat ini kosong, gunakan default
-				if defaultValue, hasDefault := tag["default"]; hasDefault && value == "" {
-					value = defaultValue
-					// Validasi ulang dengan nilai default
-					if err := validate.Var(value, tags); err == nil {
-						continue
-					}
-				}
-
 				arr = append(arr, DataError{
 					DATA:    "Data Array " + num,
 					MESSAGE: getMessage(rules, field, fieldError.Tag()),
@@ -95,7 +100,7 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 		}
 	}
 
-	//Hasil Yang Akan ditampilkan ke output
+	// Hasil Yang Akan ditampilkan ke output
 	jsonOutput, err := json.MarshalIndent(arr, "", "  ")
 	return string(jsonOutput), err
 }
