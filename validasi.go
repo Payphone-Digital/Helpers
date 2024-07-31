@@ -2,7 +2,10 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -15,41 +18,71 @@ type DataError struct {
 
 type Validator struct{}
 
-func (v *Validator) Validate(data map[string]interface{}, rules []map[string]interface{}, num string) (string, error) {
-	// Variabel Data Awal
+func (v *Validator) Validate(data map[string]interface{}, rules []map[string]interface{}, num string) (map[string]interface{}, string, error) {
 	validate := validator.New()
 	var arr []DataError
 	var intData []string
 	var extData []string
 	var tags string
 	var banding int
+	fieldErrors := make(map[string]bool)
+	convertedData := make(map[string]interface{})
 
-	// Mengecek data yang tidak diizinkan Masuk
+	// Collect external data keys
 	for al := range data {
 		extData = append(extData, al)
 	}
 
 	for idx, tag := range rules {
 		field := tag["column"].(string)
+		dataType := tag["type"].(string)
 		intData = append(intData, field)
 
-		// Mengecek Column Apakah Sudah Ada
 		value, ok := data[field]
-		if !ok || value == "" {
-			// Cek apakah ada default value dan apakah default tidak kosong
-			if defaultValue, hasDefault := tag["default"]; hasDefault && defaultValue != "" {
-				value = defaultValue
+		if !ok || isEmpty(value) {
+			// Apply default value if input is empty and default is provided
+			if defaultValue, hasDefault := tag["default"]; hasDefault && !isEmpty(defaultValue) {
+				convertedDefaultValue, err := convertType(defaultValue, dataType)
+				if err != nil {
+					arr = append(arr, DataError{
+						DATA:    "Data Array " + num,
+						MESSAGE: fmt.Sprintf("Cannot convert default value %v to %s", defaultValue, dataType),
+						ERROR:   field + " Type conversion error",
+					})
+					continue
+				}
+				value = convertedDefaultValue
 			} else {
-				arr = append(arr, DataError{
-					DATA:    "Data Array " + num,
-					MESSAGE: "Not found " + field,
-					ERROR:   field + " Field not found",
-				})
+				if !fieldErrors[field] {
+					arr = append(arr, DataError{
+						DATA:    "Data Array " + num,
+						MESSAGE: "Not found " + field,
+						ERROR:   field + " Field not found",
+					})
+					fieldErrors[field] = true
+				}
 				continue
 			}
 		}
 
-		// Menyusun Validasi Apa Yang Harus Digunakan Pada Data Json
+		// Convert data type
+		convertedValue, err := convertType(value, dataType)
+		if err != nil {
+			arr = append(arr, DataError{
+				DATA:    "Data Array " + num,
+				MESSAGE: fmt.Sprintf("Cannot convert %v to %s", value, dataType),
+				ERROR:   field + " Type conversion error",
+			})
+			continue
+		}
+		convertedData[field] = convertedValue
+
+		// Skip validation if the field is empty and default is applied
+		if isEmpty(value) && tag["default"] != nil && !isEmpty(tag["default"]) {
+			continue
+		}
+
+		// Prepare validation tags
 		for _, v := range rules[idx]["validasi"].([]interface{}) {
 			vMap, _ := v.(map[string]interface{})
 			if banding != idx {
@@ -57,17 +90,8 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 				tags = ""
 			}
 			if rules[idx]["column"].(string) == field {
-				if val, hasVal := vMap["value"]; hasVal {
-					if valStr, ok := val.(string); ok && valStr != "" {
-						tags = tags + "," + vMap["valid"].(string) + "=" + valStr
-					} else {
-						// Handle missing or empty value for validation
-						arr = append(arr, DataError{
-							DATA:    "Data Array " + num,
-							MESSAGE: "Missing or invalid value for validation " + vMap["valid"].(string),
-							ERROR:   field + " Error " + vMap["valid"].(string),
-						})
-					}
+				if val, hasVal := vMap["value"]; hasVal && val != "" {
+					tags = tags + "," + vMap["valid"].(string) + "=" + val.(string)
 				} else {
 					tags = tags + "," + vMap["valid"].(string)
 				}
@@ -75,37 +99,41 @@ func (v *Validator) Validate(data map[string]interface{}, rules []map[string]int
 		}
 		tags = strings.TrimLeft(tags, ",")
 
-		// Core Validasi Untuk Mengecek Validasi
-		if err := validate.Var(value, tags); err != nil {
-			validationError := err.(validator.ValidationErrors)
-			for _, fieldError := range validationError {
-				arr = append(arr, DataError{
-					DATA:    "Data Array " + num,
-					MESSAGE: getMessage(rules, field, fieldError.Tag()),
-					ERROR:   field + " Error " + fieldError.Tag(),
-				})
+		// Perform validation
+		if !(dataType == "bool" && value == false) {
+			if err := validate.Var(convertedValue, tags); err != nil {
+				validationError := err.(validator.ValidationErrors)
+				for _, fieldError := range validationError {
+					if !fieldErrors[field] {
+						arr = append(arr, DataError{
+							DATA:    "Data Array " + num,
+							MESSAGE: getMessage(rules, field, fieldError.Tag()),
+							ERROR:   field + " Error " + fieldError.Tag(),
+						})
+						fieldErrors[field] = true
+					}
+				}
 			}
 		}
 	}
 
-	// Periksa setiap elemen dalam data yang masuk
+	// Check for prohibited fields
 	for _, item := range extData {
-		// Periksa apakah elemen tersebut tidak ada dalam variabel internal
 		if !contains(intData, item) {
 			arr = append(arr, DataError{
 				DATA:    "Data Array " + num,
 				MESSAGE: "This data is prohibited from being input",
-				ERROR:   item + " Forbiden Field " + item,
+				ERROR:   item + " Forbidden Field " + item,
 			})
 		}
 	}
 
-	// Hasil Yang Akan ditampilkan ke output
+	// Marshal the error array to JSON
 	jsonOutput, err := json.MarshalIndent(arr, "", "  ")
-	return string(jsonOutput), err
+	return convertedData, string(jsonOutput), err
 }
 
-// Function to get the first matching message by column and validation type
+// Get the first matching message by column and validation type
 func getMessage(data []map[string]interface{}, columnName, validationType string) string {
 	for _, item := range data {
 		if item["column"] == columnName {
@@ -120,4 +148,48 @@ func getMessage(data []map[string]interface{}, columnName, validationType string
 		}
 	}
 	return ""
+}
+
+// Convert the type of the value
+func convertType(value interface{}, dataType string) (interface{}, error) {
+	switch dataType {
+	case "string":
+		return fmt.Sprintf("%v", value), nil
+	case "int":
+		return strconv.Atoi(fmt.Sprintf("%v", value))
+	case "float":
+		return strconv.ParseFloat(fmt.Sprintf("%v", value), 64)
+	case "bool":
+		strVal := fmt.Sprintf("%v", value)
+		if strVal == "true" || strVal == "false" {
+			return strconv.ParseBool(strVal)
+		}
+		return nil, fmt.Errorf("invalid boolean value: %v", value)
+	case "date":
+		if value == "now" {
+			return time.Now().Format("2006-01-02"), nil
+		}
+		return time.Parse("2006-01-02", fmt.Sprintf("%v", value))
+	case "datetime":
+		if value == "now" {
+			return time.Now().Format("2006-01-02 15:04:05"), nil
+		}
+		return time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%v", value))
+	default:
+		return value, fmt.Errorf("unsupported data type: %s", dataType)
+	}
+}
+
+// Check if the value is empty
+func isEmpty(value interface{}) bool {
+	switch v := value.(type) {
+	case bool:
+		return false
+	case string:
+		return v == ""
+	case int, int32, int64, float32, float64:
+		return v == 0
+	default:
+		return value == nil
+	}
 }
